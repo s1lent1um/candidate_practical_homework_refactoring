@@ -2,6 +2,9 @@
 
 namespace Language;
 
+use Language\api\Exception as ApiException;
+use SebastianBergmann\GlobalState\RuntimeException;
+
 /**
  * Business logic related to generating language files.
  */
@@ -14,13 +17,32 @@ class LanguageBatchBo
      */
     protected static $applications = array();
 
+    /** @var Application */
+    protected $app;
+
+    public function __construct(Application $app = null)
+    {
+        $this->app = $app;
+    }
+
+    /**
+     * @return Application
+     */
+    public function getApp()
+    {
+        if (is_null($this->app)) {
+            $this->app = Application::getInstance();
+        }
+        return $this->app;
+    }
+
     /**
      * Starts the language file generation.
      *
      * @throws \Exception
      * @return void
      */
-    public static function generateLanguageFiles()
+    public function generateLanguageFiles()
     {
         // The applications where we need to translate.
         self::$applications = Config::get('system.translated_applications');
@@ -30,7 +52,7 @@ class LanguageBatchBo
             echo "[APPLICATION: " . $application . "]\n";
             foreach ($languages as $language) {
                 echo "\t[LANGUAGE: " . $language . "]";
-                if (self::getLanguageFile($application, $language)) {
+                if ($this->getLanguageFile($application, $language)) {
                     echo " OK\n";
                 } else {
                     throw new \Exception('Unable to generate language file!');
@@ -49,29 +71,21 @@ class LanguageBatchBo
      *
      * @return bool   The success of the operation.
      */
-    protected static function getLanguageFile($application, $language)
+    protected function getLanguageFile($application, $language)
     {
-        $result = false;
-        $languageResponse = ApiCall::call(
-            'system_api',
-            'language_api',
-            array(
-                'system' => 'LanguageFiles',
-                'action' => 'getLanguageFile'
-            ),
-            array('language' => $language)
-        );
-
         try {
-            self::checkForApiErrorResult($languageResponse);
-        } catch (\Exception $e) {
-            throw new \Exception('Error during getting language file: (' . $application . '/' . $language . ')');
+            $languageResponse = $this->getApp()
+                ->getLanguageApi()
+                ->getSystemHandler('LanguageFiles')
+                ->call('getLanguageFile', ['language' => $language]);
+        } catch (ApiException $e) {
+            throw new RuntimeException("Error during getting language file: ({$application}/{$language})", 0, $e);
         }
 
         // If we got correct data we store it.
         $destination = self::getLanguageCachePath($application) . $language . '.php';
         // If there is no folder yet, we'll create it.
-        var_dump($destination);
+        echo $destination;
         if (!is_dir(dirname($destination))) {
             mkdir(dirname($destination), 0755, true);
         }
@@ -112,13 +126,16 @@ class LanguageBatchBo
             $languages = self::getAppletLanguages($appletLanguageId);
             if (empty($languages)) {
                 throw new \Exception('There is no available languages for the ' . $appletLanguageId . ' applet.');
-            } else {
-                echo ' - Available languages: ' . implode(', ', $languages) . "\n";
             }
+
+            echo ' - Available languages: ' . implode(', ', $languages) . "\n";
             $path = Config::get('system.paths.root') . '/cache/flash';
             foreach ($languages as $language) {
                 $xmlContent = self::getAppletLanguageFile($appletLanguageId, $language);
                 $xmlFile = $path . '/lang_' . $language . '.xml';
+                if (!is_dir(dirname($xmlFile))) {
+                    mkdir(dirname($xmlFile), 0755, true);
+                }
                 if (strlen($xmlContent) == file_put_contents($xmlFile, $xmlContent)) {
                     echo " OK saving $xmlFile was successful.\n";
                 } else {
@@ -201,6 +218,7 @@ class LanguageBatchBo
 
     /**
      * Checks the api call result.
+     * @deprecated
      *
      * @param mixed $result The api call result to check.
      *

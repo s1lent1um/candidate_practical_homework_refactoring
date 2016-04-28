@@ -1,0 +1,64 @@
+<?php
+
+namespace Language\api;
+
+use Language\ApiCall;
+
+class Handler
+{
+    public $target;
+    public $mode;
+
+    public function __construct($target, $mode)
+    {
+        $this->target = $target;
+        $this->mode = $mode;
+    }
+
+    /**
+     * @param $system
+     * @return SystemHandler
+     */
+    public function getSystemHandler($system)
+    {
+        return new SystemHandler($this, $system);
+    }
+    
+    /**
+     * @param $system
+     * @param $action
+     * @param $args
+     * @return array|void
+     */
+    public function call($system, $action, $args)
+    {
+        $response = ApiCall::call(
+            $this->target,
+            $this->mode,
+            ['system' => $system, 'action' => $action],
+            $args
+        );
+
+        return $response;
+    }
+
+
+    protected function validateResponse($response)
+    {
+        // Error during the api call.
+        if ($response === false || !isset($response['status'])) {
+            throw new ExecutionException('Error during the api call');
+        }
+        // Wrong response.
+        if ($response['status'] != 'OK') {
+            throw new UsageException('Wrong response: '
+                . (!empty($response['error_type']) ? 'Type(' . $response['error_type'] . ') ' : '')
+                . (!empty($response['error_code']) ? 'Code(' . $response['error_code'] . ') ' : '')
+                . ((string)$response['data']));
+        }
+        // Wrong content.
+        if ($response['data'] === false) {
+            throw new UsageException('Wrong content!');
+        }
+    }
+}
