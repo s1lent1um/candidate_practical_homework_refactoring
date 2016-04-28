@@ -2,7 +2,7 @@
 
 namespace Language;
 
-class RuntimeException
+class RuntimeException extends \Exception
 {
 
 }

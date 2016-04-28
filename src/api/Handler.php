@@ -28,7 +28,10 @@ class Handler
      * @param $system
      * @param $action
      * @param $args
-     * @return array|void
+
+     * @return array|null
+     * @throws ExecutionException
+     * @throws UsageException
      */
     public function call($system, $action, $args)
     {
@@ -39,10 +42,15 @@ class Handler
             $args
         );
 
+        $this->validateResponse($response);
         return $response;
     }
 
-
+    /**
+     * @param $response
+     * @throws ExecutionException
+     * @throws UsageException
+     */
     protected function validateResponse($response)
     {
         // Error during the api call.

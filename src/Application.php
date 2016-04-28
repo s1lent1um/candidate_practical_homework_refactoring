@@ -41,6 +41,7 @@ class Application
 
     public function run()
     {
+        // Controller abstraction doesn't seem necessary right now
         $languageBatchBo = new LanguageBatchBo();
         $languageBatchBo->generateLanguageFiles();
         $languageBatchBo->generateAppletLanguageXmlFiles();
