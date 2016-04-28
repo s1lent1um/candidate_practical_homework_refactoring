@@ -100,4 +100,13 @@ class LanguageBatchBoTest extends \PHPUnit_Framework_TestCase
         $method = new Invoker($this->getInstance(), 'checkForApiErrorResult');
         $method->invoke(['status' => 'OK', 'data' => []]);
     }
+    
+    public function testGetAppletLanguageFile()
+    {
+        $method = new Invoker($this->getInstance(), 'getAppletLanguageFile');
+        $result = $method->invoke('anyApplet', 'anyLanguage');
+        
+        $this->assertInternalType('string', $result);
+        $this->assertStringStartsWith('<?xml version="1.0" encoding="UTF-8"?>', $result);
+    }
 }
