@@ -11,10 +11,14 @@ class Application
 
     /** @var  Handler */
     protected $languageApi;
+
+    /** @var Config  */
+    protected $config;
     
     public function __construct()
     {
         static::$instance or static::$instance = $this;
+        $this->config = new Config();
     }
 
     /**
@@ -37,6 +41,14 @@ class Application
             $this->languageApi = new Handler('system_api', 'language_api');
         }
         return $this->languageApi;
+    }
+
+    /**
+     * @return Config
+     */
+    public function getConfig()
+    {
+        return $this->config;
     }
 
     public function run()

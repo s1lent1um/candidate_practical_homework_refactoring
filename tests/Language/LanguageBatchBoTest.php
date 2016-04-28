@@ -15,23 +15,6 @@ class LanguageBatchBoTest extends \PHPUnit_Framework_TestCase
         return new LanguageBatchBo();
     }
 
-    public function testGetLanguageCachePath()
-    {
-        $method = new Invoker($this->getInstance(), 'getLanguageCachePath');
-
-        $prefix = realpath(dirname(dirname(__DIR__))) . '/cache/';
-        $apps = [
-            'portal',
-            'flash',
-            'something',
-            'something else',
-        ];
-
-        foreach ($apps as $app) {
-            $this->assertEquals($prefix . $app . '/', $method->invoke($app));
-        }
-    }
-    
     public function testGetAppletLanguages()
     {
         $method = new Invoker($this->getInstance(), 'getAppletLanguages');

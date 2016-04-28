@@ -40,9 +40,7 @@ class LanguageBatchBo
             echo "[APPLICATION: " . $application . "]\n";
             foreach ($languages as $language) {
                 echo "\t[LANGUAGE: " . $language . "]";
-                if (!$this->getLanguageFile($application, $language)) {
-                    throw new RuntimeException('Unable to generate language file!');
-                }
+                $this->getLanguageFile($application, $language);
                 echo " OK\n";
             }
         }
@@ -72,30 +70,10 @@ class LanguageBatchBo
             );
         }
 
-        // If we got correct data we store it.
-        $destination = $this->getLanguageCachePath($application) . $language . '.php';
-        // If there is no folder yet, we'll create it.
-        echo $destination;
-        if (!is_dir(dirname($destination))) {
-            mkdir(dirname($destination), 0755, true);
-        }
-
-        $result = file_put_contents($destination, $languageResponse);
-
-        return (bool)$result;
+        $writer = new FileWriter($this->app->getConfig(), $application);
+        $writer->write($language, $languageResponse);
     }
 
-    /**
-     * Gets the directory of the cached language files.
-     *
-     * @param string $application The application.
-     *
-     * @return string   The directory of the cached language files.
-     */
-    protected static function getLanguageCachePath($application)
-    {
-        return Config::get('system.paths.root') . '/cache/' . $application . '/';
-    }
 
     /**
      * Gets the language files for the applet and puts them into the cache.
@@ -119,20 +97,11 @@ class LanguageBatchBo
             }
 
             echo ' - Available languages: ' . implode(', ', $languages) . "\n";
-            $path = $this->getLanguageCachePath('flash');
+            $writer = new FileXmlWriter($this->app->getConfig(), 'flash');
             foreach ($languages as $language) {
                 $xmlContent = $this->getAppletLanguageFile($appletLanguageId, $language);
-                $xmlFile = $path . '/lang_' . $language . '.xml';
-                if (!is_dir(dirname($xmlFile))) {
-                    mkdir(dirname($xmlFile), 0755, true);
-                }
-                if (strlen($xmlContent) != file_put_contents($xmlFile, $xmlContent)) {
-                    throw new RuntimeException(
-                        "Unable to save applet: ({$appletLanguageId}) language: ({$language}) xml ({$xmlFile})!" .
-                        (error_get_last() ? "Reason: " . error_get_last() : '')
-                    );
-                }
-                echo " OK saving $xmlFile was successful.\n";
+                $writer->write($language, $xmlContent);
+                echo " OK saving " . $writer->getDestination($language) . " was successful.\n";
             }
             echo " < $appletLanguageId ($appletDirectory) language xml cached.\n";
         }
