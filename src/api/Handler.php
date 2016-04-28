@@ -43,7 +43,7 @@ class Handler
         );
 
         $this->validateResponse($response);
-        return $response;
+        return $response['data'];
     }
 
     /**

@@ -80,7 +80,7 @@ class LanguageBatchBo
             mkdir(dirname($destination), 0755, true);
         }
 
-        $result = file_put_contents($destination, $languageResponse['data']);
+        $result = file_put_contents($destination, $languageResponse);
 
         return (bool)$result;
     }
@@ -151,7 +151,7 @@ class LanguageBatchBo
     protected function getAppletLanguages($applet)
     {
         try {
-            $result = $this->app->getLanguageApi()
+            return $this->app->getLanguageApi()
                 ->getSystemHandler('LanguageFiles')
                 ->call('getAppletLanguages', ['applet' => $applet]);
         } catch (ApiException $previous) {
@@ -161,8 +161,6 @@ class LanguageBatchBo
                 $previous
             );
         }
-
-        return $result['data'];
     }
 
 
@@ -178,7 +176,7 @@ class LanguageBatchBo
     protected function getAppletLanguageFile($applet, $language)
     {
         try {
-            $result = $this->app->getLanguageApi()
+            return $this->app->getLanguageApi()
                 ->getSystemHandler('LanguageFiles')
                 ->call('getAppletLanguageFile', ['applet' => $applet, 'language' => $language]);
         } catch (ApiException $previous) {
@@ -188,7 +186,5 @@ class LanguageBatchBo
                 $previous
             );
         }
-
-        return $result['data'];
     }
 }
