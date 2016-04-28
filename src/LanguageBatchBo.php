@@ -21,18 +21,7 @@ class LanguageBatchBo
 
     public function __construct(Application $app = null)
     {
-        $this->app = $app;
-    }
-
-    /**
-     * @return Application
-     */
-    public function getApp()
-    {
-        if (is_null($this->app)) {
-            $this->app = Application::getInstance();
-        }
-        return $this->app;
+        $this->app = $app ?: Application::getInstance();
     }
 
     /**
@@ -72,8 +61,7 @@ class LanguageBatchBo
     protected function getLanguageFile($application, $language)
     {
         try {
-            $languageResponse = $this->getApp()
-                ->getLanguageApi()
+            $languageResponse = $this->app->getLanguageApi()
                 ->getSystemHandler('LanguageFiles')
                 ->call('getLanguageFile', ['language' => $language]);
         } catch (ApiException $previous) {
@@ -163,8 +151,7 @@ class LanguageBatchBo
     protected function getAppletLanguages($applet)
     {
         try {
-            $result = $this->getApp()
-                ->getLanguageApi()
+            $result = $this->app->getLanguageApi()
                 ->getSystemHandler('LanguageFiles')
                 ->call('getAppletLanguages', ['applet' => $applet]);
         } catch (ApiException $previous) {
@@ -191,8 +178,7 @@ class LanguageBatchBo
     protected function getAppletLanguageFile($applet, $language)
     {
         try {
-            $result = $this->getApp()
-                ->getLanguageApi()
+            $result = $this->app->getLanguageApi()
                 ->getSystemHandler('LanguageFiles')
                 ->call('getAppletLanguageFile', ['applet' => $applet, 'language' => $language]);
         } catch (ApiException $previous) {
@@ -204,34 +190,5 @@ class LanguageBatchBo
         }
 
         return $result['data'];
-    }
-
-    /**
-     * Checks the api call result.
-     * @deprecated
-     *
-     * @param mixed $result The api call result to check.
-     *
-     * @throws \Exception   If the api call was not successful.
-     *
-     * @return void
-     */
-    protected static function checkForApiErrorResult($result)
-    {
-        // Error during the api call.
-        if ($result === false || !isset($result['status'])) {
-            throw new \Exception('Error during the api call');
-        }
-        // Wrong response.
-        if ($result['status'] != 'OK') {
-            throw new \Exception('Wrong response: '
-                . (!empty($result['error_type']) ? 'Type(' . $result['error_type'] . ') ' : '')
-                . (!empty($result['error_code']) ? 'Code(' . $result['error_code'] . ') ' : '')
-                . ((string)$result['data']));
-        }
-        // Wrong content.
-        if ($result['data'] === false) {
-            throw new \Exception('Wrong content!');
-        }
     }
 }

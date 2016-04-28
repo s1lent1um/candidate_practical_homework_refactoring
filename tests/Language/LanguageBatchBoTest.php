@@ -42,65 +42,6 @@ class LanguageBatchBoTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $method->invoke('anything'));
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Error during the api call
-     */
-    public function testCheckForApiErrorResultFalseArg()
-    {
-        $method = new Invoker($this->getInstance(), 'checkForApiErrorResult');
-        $method->invoke(false);
-    }
-
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Error during the api call
-     */
-    public function testCheckForApiErrorResultBadArg()
-    {
-        $method = new Invoker($this->getInstance(), 'checkForApiErrorResult');
-        $method->invoke(0);
-    }
-
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Error during the api call
-     */
-    public function testCheckForApiErrorResultNoStatus()
-    {
-        $method = new Invoker($this->getInstance(), 'checkForApiErrorResult');
-        $method->invoke(['statuS' => 'OK']);
-    }
-
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessageRegExp /^Wrong response/
-     */
-    public function testCheckForApiErrorResultErrorResponse()
-    {
-        $method = new Invoker($this->getInstance(), 'checkForApiErrorResult');
-        $method->invoke(['status' => 'bad']);
-    }
-
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessageRegExp /^Wrong content/
-     */
-    public function testCheckForApiErrorResultBadData()
-    {
-        $method = new Invoker($this->getInstance(), 'checkForApiErrorResult');
-        $method->invoke(['status' => 'OK', 'data' => false]);
-    }
-
-    /**
-     * No exception thrown
-     */
-    public function testCheckForApiErrorResultOK()
-    {
-        $method = new Invoker($this->getInstance(), 'checkForApiErrorResult');
-        $method->invoke(['status' => 'OK', 'data' => []]);
-    }
-    
     public function testGetAppletLanguageFile()
     {
         $method = new Invoker($this->getInstance(), 'getAppletLanguageFile');
