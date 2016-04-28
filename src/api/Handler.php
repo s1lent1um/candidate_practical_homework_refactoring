@@ -57,6 +57,10 @@ class Handler
         if ($response === false || !isset($response['status'])) {
             throw new ExecutionException('Error during the api call');
         }
+        // Wrong content.
+        if ($unset = array_diff(['status', 'data'], array_keys($response))) {
+            throw new UsageException('Malformed response. Fields not set: "' . implode('", "', $unset) . '"');
+        }
         // Wrong response.
         if ($response['status'] != 'OK') {
             throw new UsageException('Wrong response: '

@@ -2,9 +2,7 @@
 
 namespace tests\Language\api;
 
-use Language\api\ExecutionException;
 use Language\api\Handler;
-use Language\api\UsageException;
 use Language\Application;
 use tests\Invoker;
 
@@ -30,12 +28,22 @@ class HandlerTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Language\api\UsageException
+     * @expectedExceptionMessageRegExp /^Malformed response/
+     */
+    public function testValidateMalformedResponse()
+    {
+        $method = new Invoker($this->getInstance(), 'validateResponse');
+        $method->invoke(['status' => 'bad']);
+    }
+
+    /**
+     * @expectedException \Language\api\UsageException
      * @expectedExceptionMessageRegExp /^Wrong response/
      */
     public function testValidateResponseErrorResponse()
     {
         $method = new Invoker($this->getInstance(), 'validateResponse');
-        $method->invoke(['status' => 'bad']);
+        $method->invoke(['status' => 'bad', 'data' => false]);
     }
 
     /**
